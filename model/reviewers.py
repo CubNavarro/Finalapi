@@ -12,21 +12,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 ''' Tutorial: https://www.sqlalchemy.org/library.html#tutorials, try to get into Python shell and follow along '''
 
 # Define the Post class to manage actions in 'posts' table,  with a relationship to 'users' table
-class Post(db.Model):
+class Update(db.Model):
     __tablename__ = 'posts'
 
     # Define the Notes schema
     id = db.Column(db.Integer, primary_key=True)
     note = db.Column(db.Text, unique=False, nullable=False)
-    image = db.Column(db.String, unique=False)
+    email = db.Column(db.String, unique=False)
+    reviewtx = db.Column(db.String, unique=False)
+    star = db.Column(db.String, unique=False)
     # Define a relationship in Notes Schema to userID who originates the note, many-to-one (many notes to one user)
     userID = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     # Constructor of a Notes object, initializes of instance variables within object
-    def __init__(self, id, note, image):
+    def __init__(self, id, note, email, reviewtx, star):
         self.userID = id
         self.note = note
-        self.image = image
+        self.email = email
+        self.reviewtx = reviewtx
+        self.star = star
 
     # Returns a string representation of the Notes object, similar to java toString()
     # returns string
@@ -53,14 +57,15 @@ class Post(db.Model):
         file = os.path.join(path, self.image)
         file_text = open(file, 'rb')
         file_read = file_text.read()
-        file_encode = base64.encodebytes(file_read)
+       # file_encode = base64.encodebytes(file_read)
         
         return {
             "id": self.id,
             "userID": self.userID,
-            "note": self.note,
-            "image": self.image,
-            "base64": str(file_encode)
+            "reviewtx": self.reviewtx,
+            "star": self.star,
+            "email":self.email,
+           # "base64": str(file_encode)
         }
 
 
@@ -69,25 +74,27 @@ class Post(db.Model):
 # -- a.) db.Model is like an inner layer of the onion in ORM
 # -- b.) User represents data we want to store, something that is built on db.Model
 # -- c.) SQLAlchemy ORM is layer on top of SQLAlchemy Core, then SQLAlchemy engine, SQL
-class User(db.Model):
+class reviewadd(db.Model):
     __tablename__ = 'users'  # table name is plural, class name is singular
 
     # Define the User schema with "vars" from object
     id = db.Column(db.Integer, primary_key=True)
     _name = db.Column(db.String(255), unique=False, nullable=False)
     _uid = db.Column(db.String(255), unique=True, nullable=False)
-    _password = db.Column(db.String(255), unique=False, nullable=False)
-    _dob = db.Column(db.Date)
+    _email = db.Column(db.String(255), unique=False, nullable=True)
+    _star = db.Column(db.String(255), unique=False, nullable=False)
+    _reviewtx = db.Column(db.String(255), unique=False, nullable=False)
 
     # Defines a relationship between User record and Notes table, one-to-many (one user to many notes)
-    posts = db.relationship("Post", cascade='all, delete', backref='users', lazy=True)
+    posts = db.relationship("Update", cascade='all, delete', backref='users', lazy=True)
 
     # constructor of a User object, initializes the instance variables within object (self)
-    def __init__(self, name, uid, password="123qwerty", dob=date.today()):
+    def __init__(self, name, uid, email, star, reviewtx):
         self._name = name    # variables with self prefix become part of the object, 
         self._uid = uid
-        self.set_password(password)
-        self._dob = dob
+        self._email = email
+        self._star = star
+        self._reviewtx = reviewtx
 
     # a name getter method, extracts name from object
     @property
@@ -112,37 +119,44 @@ class User(db.Model):
     # check if uid parameter matches user id in object, return boolean
     def is_uid(self, uid):
         return self._uid == uid
-    
+   
     @property
-    def password(self):
-        return self._password[0:10] + "..." # because of security only show 1st characters
+    def email(self):
+       return self._email
+  
+    @email.setter
+    def email(self, email):
+       self._email = email
 
-    # update password, this is conventional setter
-    def set_password(self, password):
-        """Create a hashed password."""
-        self._password = generate_password_hash(password, method='sha256')
 
-    # check password parameter versus stored/encrypted password
-    def is_password(self, password):
-        """Check against hashed password."""
-        result = check_password_hash(self._password, password)
-        return result
-    
-    # dob property is returned as string, to avoid unfriendly outcomes
-    @property
-    def dob(self):
-        dob_string = self._dob.strftime('%m-%d-%Y')
-        return dob_string
-    
-    # dob should be have verification for type date
-    @dob.setter
-    def dob(self, dob):
-        self._dob = dob
+    def is_email(self, email):
+       return self._email == email
     
     @property
-    def age(self):
-        today = date.today()
-        return today.year - self._dob.year - ((today.month, today.day) < (self._dob.month, self._dob.day))
+    def star(self):
+       return self._star
+  
+    @star.setter
+    def star(self, star):
+       self._star = star
+
+
+    def is_star(self, star):
+        return self._star == star
+    
+    @property
+    def reviewtx(self):
+       return self._reviewtx
+  
+    @reviewtx.setter
+    def reviewtx(self, reviewtx):
+       self._reviewtx = reviewtx
+
+
+    def is_reviewtx(self, reviewtx):
+       return self._reviewtx == reviewtx
+  
+
     
     # output content using str(object) in human readable form, uses getter
     # output content using json dumps, this is ready for API response
@@ -168,21 +182,26 @@ class User(db.Model):
             "id": self.id,
             "name": self.name,
             "uid": self.uid,
-            "dob": self.dob,
-            "age": self.age,
-            "posts": [post.read() for post in self.posts]
+            "email": self.email,
+            "star": self.star,
+            "reviewtx": self.reviewtx,
+          #  "posts": [post.read() for post in self.posts]
         }
 
     # CRUD update: updates user name, password, phone
     # returns self
-    def update(self, name="", uid="", password=""):
+    def update(self, name="", uid="", email="", star="", reviewtx=""):
         """only updates values with length"""
         if len(name) > 0:
             self.name = name
         if len(uid) > 0:
             self.uid = uid
-        if len(password) > 0:
-            self.set_password(password)
+        if len(email) > 0:
+           self.email = email
+        if len (star) > 0:
+           self.star = star 
+        if len(reviewtx) > 0:
+           self.reviewtx = reviewtx    
         db.session.commit()
         return self
 
@@ -198,26 +217,28 @@ class User(db.Model):
 
 
 # Builds working data for testing
-def initUsers():
+def initreview():
     with app.app_context():
         """Create database and tables"""
+        db.init_app(app)
         db.create_all()
+        
         """Tester data for table"""
-        u1 = User(name='Thomas Edison', uid='toby', password='123toby', dob=date(1847, 2, 11))
-        u2 = User(name='Nicholas Tesla', uid='niko', password='123niko')
-        u3 = User(name='Alexander Graham Bell', uid='lex', password='123lex')
-        u4 = User(name='Eli Whitney', uid='whit', password='123whit')
-        u5 = User(name='John Mortensen', uid='jm1021', dob=date(1959, 10, 21))
+        r1 = reviewadd(name='Sam Johnson', uid='r1', email= 'Sam.johnson@gmail.com', star='three', reviewtx='The place was amazing and I really enjoyed it')
+        r2 = reviewadd(name='Eric Middleton', uid='r2', email='Eric.Middleton@gmail.om', star='five', reviewtx='I wanted to stay longer and I really loved it. Thanks for the amazing Vac')
+        r3 = reviewadd(name='Theo Fatless', uid='r3', email='Theo.Fatless@gmail.com', star='two', reviewtx='It was really nice but it was kinda hard to look though the website')
+        r4 = reviewadd(name='Crunchy Mcfee ', uid='r4', email='Crunchy.Mcfee@gmail.com', star='three', reviewtx='It was good but I wanted a little more')
+        r5 = reviewadd(name='Thicc Boi', uid='r5', email='Thicc.Boi@gmail.com', star='five', reviewtx='It satisfided me and I had a fun time')
 
-        users = [u1, u2, u3, u4, u5]
+        users = [r1, r2, r3, r4, r5]
 
         """Builds sample user/note(s) data"""
         for user in users:
             try:
                 '''add a few 1 to 4 notes per user'''
                 for num in range(randrange(1, 4)):
-                    note = "#### " + user.name + " note " + str(num) + ". \n Generated by test data."
-                    user.posts.append(Post(id=user.id, note=note, image='ncs_logo.png'))
+                     note = "#### " + user.name + " note " + str(num) + ". \n Generated by test data."
+                user.posts.append(Update(id=user.id, note=note, email=user._email, star=user._star, reviewtx=user._reviewtx, image='ncs_logo.png'))
                 '''add user/post data to table'''
                 user.create()
             except IntegrityError:

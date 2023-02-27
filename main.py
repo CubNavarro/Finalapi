@@ -6,8 +6,8 @@ from flask import render_template  # import render_template from "public" flask 
 # import "packages" from "this" project
 from __init__ import app,db  # Definitions initialization
 from model.jokes import initJokes
-from model.users import initUsers
-from model.players import initPlayers
+from model.reviews import initUsers
+from model.reviewers import initPlayers
 
 
 # setup APIs
