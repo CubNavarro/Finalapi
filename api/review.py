@@ -23,6 +23,11 @@ class ReviewAPI:
             name = body.get('name')
             if name is None or len(name) < 2:
                 return {'message': f'Name is missing, or is less than 2 characters'}, 400
+            
+            uid = body.get('uid')
+            if uid is None or len(uid) < 2:
+                return {'message': f'User ID is missing, or is less than 2 characters'}, 400
+            # look for password and dob
             # validate uid
 
             email = body.get('')

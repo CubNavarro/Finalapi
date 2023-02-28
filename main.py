@@ -6,8 +6,7 @@ from flask import render_template  # import render_template from "public" flask 
 # import "packages" from "this" project
 from __init__ import app,db  # Definitions initialization
 from model.jokes import initJokes
-from model.reviews import initUsers
-from model.reviewers import initPlayers
+from model.reviewers import initreview
 
 
 # setup APIs
@@ -44,8 +43,8 @@ def stub():
 def activate_job():  # activate these items 
     db.init_app(app)
     initJokes()
-    initUsers()
-    initPlayers()
+    initreview()
+    #initPlayers()
 
 # this runs the application on the development server
 if __name__ == "__main__":
