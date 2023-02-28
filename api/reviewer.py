@@ -51,8 +51,27 @@ class reviewAPI:
             reviews = reviewadd.query.all()    # read/extract all users from database
             json_ready = [reviews.read() for reviews in reviews]  # prepare output in json
             return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
+        
+            
+    class _Security(Resource):
+
+        def post(self):
+            ''' Read data for json body '''
+            body = request.get_json()
+            
+            ''' Get Data '''
+            uid = body.get('uid')
+            if uid is None or len(uid) < 2:
+                return {'message': f'User ID is missing, or is less than 2 characters'}, 400
+            
+            
+            ''' Find user '''
+            
+            
+            ''' authenticated user '''
 
 
     # building RESTapi endpoint
     api.add_resource(_Create, '/create')
     api.add_resource(_Read, '/')
+    api.add_resource(_Security, '/authenticate')
