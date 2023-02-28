@@ -6,11 +6,11 @@ from datetime import datetime
 from model.reviewers import reviewadd
 
 # Change variable name and API name and prefix
-player_api = Blueprint('player_api', __name__,
+review_api = Blueprint('review_api', __name__,
                    url_prefix='/api/reviews')
 
 # API docs https://flask-restful.readthedocs.io/en/latest/api.html
-api = Api(player_api)
+api = Api(review_api)
 
 class ReviewAPI:     
     class _Create(Resource):

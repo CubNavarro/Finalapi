@@ -12,7 +12,7 @@ from model.reviewers import initreview
 # setup APIs
 from api.covid import covid_api # Blueprint import api definition
 from api.joke import joke_api # Blueprint import api definition
-from api.reviewer import review_api # Blueprint import api definition
+from api.review import review_api # Blueprint import api definition
 #from api.player import player_api
 
 
@@ -41,7 +41,6 @@ def stub():
 
 @app.before_first_request
 def activate_job():  # activate these items 
-    db.init_app(app)
     initJokes()
     initreview()
     #initPlayers()
